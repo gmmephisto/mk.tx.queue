@@ -129,3 +129,30 @@ unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
 - - [1573515530802276, 'R', 'two']
 ...
 ```
+
+* Use fiber for take tasks from queue
+
+```sh
+unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
+---
+- []
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.test()
+---
+- [1573516069920046, 'T', 'task 1']
+- wait: 3.0017812252045
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.test()
+---
+- [1573516075283348, 'T', 'task 1']
+- wait: 3.0007364749908
+...
+
+unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
+---
+- - [1573516069920046, 'T', 'task 1']
+  - [1573516075283348, 'T', 'task 1']
+...
+```

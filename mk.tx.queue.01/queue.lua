@@ -25,6 +25,9 @@ STATUS = {}
 STATUS.READY = 'R'
 STATUS.TAKEN = 'T'
 
+fiber = require 'fiber'
+local wait = fiber.channel(0)
+
 queue = {}
 
 local clock = require 'clock'
@@ -47,16 +50,21 @@ local F = {
     data   = 3;
 }
 
-function queue.take(...)
-    for _,t in
-        box.space.queue.index.status
-        :pairs({ STATUS.READY }, { iterator=box.index.EQ })
-    do
-        return box.space.queue:update({t.id}, {
-            {'=', F.status, STATUS.TAKEN }
-        })
+function queue.take(timeout)
+    if not timeout then timeout = 0 end
+    local now = fiber.time()
+    local found
+    while not found do
+        found = box.space.queue.index.status
+            :pairs({STATUS.READY},{ iterator = box.index.EQ }):nth(1)
+        if not found then
+            local left = (now + timeout) - fiber.time()
+            if left <= 0 then return end
+            wait:get(left)
+        end
     end
-    return
+    return box.space.queue:update({found.id},
+       {{'=', F.status, STATUS.TAKEN }})
 end
 
 function queue.ack(id)
@@ -75,6 +83,15 @@ function queue.release(id)
     else
         error("Task not taken")
     end
+end
+
+function queue.test()
+    fiber.create(function()
+        fiber.sleep(0.1)
+        queue.put("task 1")
+    end)
+    local start = fiber.time()
+    return queue.take(3), {wait = fiber.time() - start}
 end
 
 require'console'.start()
