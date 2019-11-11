@@ -41,6 +41,11 @@ end
 
 function queue.put(...)
     local id = gen_id()
+
+    if wait:has_readers() then
+        wait:put(true, 0)
+    end
+
     return box.space.queue:insert{ id, STATUS.READY, ... }
 end
 

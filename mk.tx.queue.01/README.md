@@ -156,3 +156,24 @@ unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
   - [1573516075283348, 'T', 'task 1']
 ...
 ```
+
+* Add take wake-up on put task to queue
+
+```sh
+unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
+---
+- []
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.test()
+---
+- [1573516639615334, 'T', 'task 1']
+- wait: 0.10214996337891
+...
+
+unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
+---
+- - [1573516639615334, 'T', 'task 1']
+...
+
+```
