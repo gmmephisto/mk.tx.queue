@@ -59,5 +59,23 @@ function queue.take(...)
     return
 end
 
+function queue.ack(id)
+    local t = assert(box.space.queue:get{id}, "Task not exists")
+    if t and t.status == STATUS.TAKEN then
+        return box.space.queue:delete{t.id}
+    else
+        error("Task not taken")
+    end
+end
+
+function queue.release(id)
+    local t = assert(box.space.queue:get{id}, "Task not exists")
+    if t and t.status == STATUS.TAKEN then
+        return box.space.queue:update({t.id}, {{'=', F.status, STATUS.READY }})
+    else
+        error("Task not taken")
+    end
+end
+
 require'console'.start()
 os.exit()

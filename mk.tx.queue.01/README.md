@@ -90,3 +90,42 @@ unix/:/var/run/tarantool/tarantool.sock> queue.take()
 
 unix/:/var/run/tarantool/tarantool.sock> 
 ```
+
+* Ack and release taken tasks
+
+```sh
+unix/:/var/run/tarantool/tarantool.sock> queue.put("one")
+---
+- [1573515524226896, 'R', 'one']
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.put("two")
+---
+- [1573515530802276, 'R', 'two']
+...
+
+unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
+---
+- - [1573515524226896, 'R', 'one']
+  - [1573515530802276, 'R', 'two']
+...
+
+unix/:/var/run/tarantool/tarantool.sock> t = queue.take()
+---
+...
+
+unix/:/var/run/tarantool/tarantool.sock> t.id
+---
+- 1573515524226896
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.ack(t.id)
+---
+- [1573515524226896, 'T', 'one']
+...
+
+unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
+---
+- - [1573515530802276, 'R', 'two']
+...
+```
