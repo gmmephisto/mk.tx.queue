@@ -16,6 +16,11 @@ box.space.queue:create_index('primary', {
     if_not_exists = true;
 })
 
+box.space.queue:create_index('status', {
+    parts = {2, 'string', 1, 'number'};
+    if_not_exists = true;
+})
+
 STATUS = {}
 STATUS.READY = 'R'
 STATUS.TAKEN = 'T'
@@ -36,7 +41,22 @@ function queue.put(...)
     return box.space.queue:insert{ id, STATUS.READY, ... }
 end
 
+local F = {
+    id     = 1;
+    status = 2;
+    data   = 3;
+}
+
 function queue.take(...)
+    for _,t in
+        box.space.queue.index.status
+        :pairs({ STATUS.READY }, { iterator=box.index.EQ })
+    do
+        return box.space.queue:update({t.id}, {
+            {'=', F.status, STATUS.TAKEN }
+        })
+    end
+    return
 end
 
 require'console'.start()

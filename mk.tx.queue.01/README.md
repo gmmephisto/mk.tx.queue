@@ -42,5 +42,51 @@ unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
   - [1573512645138703, 'R', 'three', 3]
   - [1573512669328604, 'R', {'one': {'two': 2}}]
 ...
+```
 
+* Status index and take method
+
+```sh
+unix/:/var/run/tarantool/tarantool.sock> queue.put(1)
+---
+- [1573513206474576, 'R', 1]
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.put(2)
+---
+- [1573513208176796, 'R', 2]
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.put(3)
+---
+- [1573513209626059, 'R', 3]
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.take()
+---
+- [1573513206474576, 'T', 1]
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.take()
+---
+- [1573513208176796, 'T', 2]
+...
+
+unix/:/var/run/tarantool/tarantool.sock> box.space.queue:select()
+---
+- - [1573513206474576, 'T', 1]
+  - [1573513208176796, 'T', 2]
+  - [1573513209626059, 'R', 3]
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.take()
+---
+- [1573513209626059, 'T', 3]
+...
+
+unix/:/var/run/tarantool/tarantool.sock> queue.take()
+---
+...
+
+unix/:/var/run/tarantool/tarantool.sock> 
 ```
