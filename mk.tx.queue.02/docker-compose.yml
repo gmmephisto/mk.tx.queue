@@ -1,0 +1,14 @@
+version: "3"
+services:
+  queue:
+    image: tarantool/tarantool:latest
+    command: tarantool /code/queue.lua
+    volumes:
+      - ./:/code
+  producer:
+    image: tarantool/tarantool:latest
+    command: tarantool /code/producer.lua test
+    volumes:
+      - ./:/code
+    depends_on:
+      - queue
